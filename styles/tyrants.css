@@ -1,0 +1,94 @@
+    .targetCard {
+        display: flex;
+        flex-flow: row;
+    }
+
+    .tyrants-flex-col{
+        display: flex;
+        flex-flow: column;
+    }
+
+    .tyrants-roll-predict-row{
+        display: flex;
+        flex-flow: row;
+        flex-wrap: wrap;
+    }
+
+
+    .tyrants-damage-result {
+        border-style: solid;
+        border-width: 1px;
+        padding:5px;
+    }
+
+    .damage-name {
+        margin: 5px 0px 5px 0px;
+    }
+
+    .damage-row {
+        display: flex;
+        flex-flow: row;
+        width: 275px;
+    }
+
+    .stat {
+        padding: 2px 5px 2px 5px;
+        display: flex;
+        flex-flow: row;
+        justify-content: space-between;
+        background-color: #B9D9EB;
+    }
+
+    .stripe {
+        background-color: #d0dceb;
+    }
+
+    .tyrants-stripe-3{
+        background-color: #6495ed;
+    }
+
+    .stat-label {
+        font-size: 10px;
+        padding-right: 5px;
+        display: inline-block;
+        vertical-align: middle;
+    }
+
+    .stat-label.damage {
+        width: 75px;
+    }
+
+
+    .tyrants-stat-value-small {
+        font-size: 10px;
+        padding-right: 0px;
+    }
+
+    .stat-value {
+        font-size: 22px;
+        padding-right: 0px;
+    }
+
+    .targetCard .stats {
+        padding: 10px;
+    }
+
+    .targetCard img {
+        max-height: 50px;
+        max-width: 50px;
+    }
+
+    .checkbox input {
+        position: relative;
+        vertical-align: middle;
+    }
+
+    .checkbox label {
+        position: relative;
+        display: inline-block;
+        vertical-align: middle;
+    }
+
+    .calculator-input-row div {
+        padding: 10px;
+    }

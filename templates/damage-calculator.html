@@ -1,0 +1,87 @@
+<!--Target Data -->
+{{#if targetInfo}}
+<div>
+    <h2>Target:{{targetInfo.name}}</h2>
+    <div class="targetCard">
+        <div>
+            <img src="{{targetInfo.img}}"></img>
+        </div>
+        <div class="targetCard stats">
+            <div class="stat">
+                <div class="stat-label single">Adversary</div>
+                <div class='stat-value'>{{targetInfo.adversary}}</div>
+            </div>
+            <div class="stat stripe">
+                <div class="stat-label">Melee<br />Defense</div>
+                <div class='stat-value'>{{targetInfo.meleeDefense}}</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">Ranged<br />Defense</div>
+                <div class='stat-value'>{{targetInfo.rangedDefense}}</div>
+            </div>
+            <div class="stat stripe">
+                <div class="stat-label">Magic<br />Resist</div>
+                <div class='stat-value'>{{targetInfo.magicResist}}</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label single">Massive</div>
+                <div class='stat-value'>{{targetInfo.massive}}</div>
+            </div>
+        </div>
+    </div>
+</div>
+{{/if}}
+<!--Controlled Data-->
+
+{{#if controlledInfo}}
+<div>
+    <h2>Target:{{controlledInfo.name}}</h2>
+    <div class="targetCard">
+        <div>
+            <div><img src="{{controlledInfo.img}}"></img></div>
+
+        </div>
+        <div class="targetCard stats">
+            <div class="stat">
+                <div class="stat-label single">Adversary</div>
+                <div class='stat-value'>{{controlledInfo.adversary}}</div>
+            </div>
+            <div class="stat stripe">
+                <div class="stat-label">Melee<br />Defense</div>
+                <div class='stat-value'>{{controlledInfo.meleeDefense}}</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">Ranged<br />Defense</div>
+                <div class='stat-value'>{{controlledInfo.rangedDefense}}</div>
+            </div>
+            <div class="stat stripe">
+                <div class="stat-label">Magic<br />Resist</div>
+                <div class='stat-value'>{{controlledInfo.magicResist}}</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label single">Massive</div>
+                <div class='stat-value'>{{controlledInfo.massive}}</div>
+            </div>
+        </div>
+    </div>
+</div>
+{{/if}}
+<div class="flexrow">
+    <div class="calculator-input-item">
+        <div>
+            <label>Damage</label>
+            <input id='damageInput' type='text' name='inputField' value=10></input>
+        </div>
+        <div>
+            <!-- Don't use this, put preserve it for future checkbox alignment issues
+            <div class="checkbox">
+                <label>Is Strain?</label><input type="checkbox" id="isStrain" name="inputField" value="true">
+            </div>
+            </div>-->
+        </div>
+    </div>
+    <div class="calculator-input-item">
+        <label>Breach</label>
+        <input id='breachInput' type='text' name='inputField' value=1></input>
+    </div>
+</div>

@@ -1,0 +1,39 @@
+Damage
+<div class="tyrants-damage-result">
+    {{#iff target '!=' undefined}}
+    <div class="damage-name">{{controlled.name}}</div>
+
+    <div class="damage-row">
+
+        <div class="stat stripe">
+            <div class="stat-label damage">Total Damage {{target.finalDamage}}</div>
+        </div>
+        <div class="stat">
+            <div class="stat-label damage">Total Breach {{target.totalBreach}}</div>
+        </div>
+        <div class="stat stripe">
+            <div class="stat-label damage">Final Damage {{target.finalDamage}}</div>
+        </div>
+    </div>
+    <div class="damage-name">{{target.name}}</div>
+
+    <div class="damage-row">
+        <div class="stat stripe">
+            <div class="stat-label damage">Armor {{target.armor}}</div>
+        </div>
+        <div class="stat">
+            <div class="stat-label damage">Soak {{target.soak}}</div>
+        </div>
+        <div class="stat stripe">
+            <div class="stat-label damage">Massive {{target.massive}}</div>
+        </div>
+    </div>
+
+    <div class="flexrow">
+        <input class="damage-value" type="text"
+            value="Strain  {{target.strain.original}} ->  {{target.strain.value}}" disabled />
+        <input class="damage-value" type="text"
+            value="Wounds  {{target.wounds.original}} ->  {{target.wounds.value}}" disabled />
+    </div>
+    {{/iff}}
+</div>

@@ -1,0 +1,18 @@
+{
+    "name": "tyrants-foundry",
+    "title": "Tyrants Campaign Setting",
+    "description": "Foundry Module for the Tyrants Campaign Setting",
+    "version": "1.0.0",
+    "author": "Norm Horseman",
+    "minimumCoreVersion": "0.8.6",
+    "compatibleCoreVersion": "9",
+    "esmodules": [
+        "scripts/tyrants.mjs"
+    ],
+    "styles": ["styles/tyrants.css"],
+    "scripts": [],
+    "packs": [],
+    "system": [
+        "starwarsffg"
+    ]
+}
