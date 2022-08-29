@@ -16,6 +16,7 @@ Hooks.on("init", async () => {
 
 
     game.tyrants = {
+        TyrantsActor,
         TyrantsDiceHelpers,
         SmartRoller
     };

@@ -13,7 +13,7 @@ export class DamageCalculator {
 
         if (result.targetInfo) {
             const options = {
-                height:330
+                height: 330
             }
             const html = await renderTemplate(`modules/tyrants-foundry/templates/damage-calculator.html`, result);
 
@@ -35,7 +35,7 @@ export class DamageCalculator {
                 default: "one",
                 render: html => console.log("Register interactivity in the rendered dialog"),
                 close: html => console.log("This always is logged no matter which option is chosen")
-            },options);
+            }, options);
             d.render(true);
         }
 
@@ -44,11 +44,11 @@ export class DamageCalculator {
 }
 
 
-async function ToWounds(){
+async function ToWounds() {
     WriteCalulate(false);
 }
 
-async function ToStrain(){
+async function ToStrain() {
     WriteCalulate(true);
 }
 
@@ -64,17 +64,11 @@ async function WriteCalulate(toStrain) {
     result.controlled = ReadTargetData(controlledToken);
 
     if (result?.target) {
-        let target = result?.target;
-        let totalSoak = target.armor + target.soak;
-        target.totalBreach = itemBreach + result.controlled.breach;
-        totalSoak -= target.totalBreach;
-        target.finalDamage = damage - totalSoak;
-        target.wounds.original = target.wounds.value;
-        target.strain.original = target.strain.value
+        result.target.CalculateDamage(itemBreach, damage, result.controlled);
         if (toStrain) {
-            target.strain.value += target.finalDamage;
+            targetActor.data.data.stats.strain.value += result.target.finalDamage;
         } else {
-            target.wounds.value += target.finalDamage;
+            targetActor.data.data.stats.wounds.value += result.target.finalDamage;
         }
 
         const myHtml = await renderTemplate(`modules/tyrants-foundry/templates/damage-calculator-result.html`, result);

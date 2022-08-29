@@ -1,10 +1,11 @@
+import { ActorFFG } from "../../../systems/starwarsffg/modules/actors/actor-ffg.js";
+import { TyrantsActor } from "./tyrants-actor.js";
 import { RollItemModifier } from "./itemModifier-roll.js";
 import { FindTarget } from "./target-helper.js";
+import { Pick, Value } from "./tools.js";
 
 export function WeaponRoll(_data, _itemParent, _ffg) {
   //Handle Item attack rolls
-  CONFIG.logger.debug("TYRANT WEAPON ROLL");
-  CONFIG.logger.debug(_data);
 
   _itemParent = FindActorParent(_itemParent);
 
@@ -31,7 +32,7 @@ function CalculateTargetInfo(breach, _itemParent, damage, _ffg) {
     target = {};
     target.name = userTarget.name;
 
-    let targetStats = userTarget?.data?.data?.stats;
+    let targetStats = userTarget?.data?.data?.stats ;
     if (targetStats) {
       let viewStats = JSON.parse(JSON.stringify(targetStats));
       target.armor = viewStats.armor;
@@ -41,49 +42,40 @@ function CalculateTargetInfo(breach, _itemParent, damage, _ffg) {
       target.strain.original = viewStats.wounds.value;
       target.wounds.original = viewStats.wounds.value;
 
-      let actorId = _itemParent._id;
-      if(!actorId){
-        actorId = _itemParent.id;
-      }
-      let giantism = game.actors.get(actorId).items.getName("Giantism");
+      let parentActorId = Pick(_itemParent?._id, _itemParent.id);
+      let targetActorId = Pick(userTarget.id, userTarget._id);
 
-      let gBreach = parseInt(giantism?.data?.data?.ranks?.current / 4, 10);
-      let totalBreach = breach + gBreach;
-
-      let armor = target.armor?.value ? target.armor?.value : 0
-      let soak = target.soak.value ? target.soak.value : 0
+      let totalBreach = breach + GetGiantismBreach(parentActorId);
+      let armor = Value(target?.armor?.value);
+      let soak = Value(target?.soak?.value);
       let totalSoak = armor + soak;
-
       totalSoak -= totalBreach;
       totalSoak = Math.max(totalSoak, 0);
       let diceDamage = damage + _ffg.success;
-
-      let massive = userTarget.items?.getName("Massive");
-      target.massive = massive?.data?.data?.ranks?.current;
-
       target.finalDamage = Math.max((diceDamage - totalSoak), 0);
       target.totalBreach = totalBreach;
       target.wounds.value += target.finalDamage;
       target.strain.value += target.finalDamage;
+      target.massive = GetTalentRanks(targetActorId, "Massive");
     }
   }
   return target;
 }
 
-function GetItems(_itemParent) {
-  let items = _itemParent?.items;
-  if (items) {
-    return items;
-  } else {
-    return _itemParent?.data?.items;
-  }
+
+
+function GetGiantismBreach(actorId) {
+  let talentRanks = GetTalentRanks(actorId, "Giantism");
+  return Math.trunc(talentRanks / 4);
+}
+
+function GetTalentRanks(actorId, talentName) {
+  let talent = game.actors.get(actorId).items.getName(talentName);
+  return talent?.data?.data?.ranks?.current;
 }
 
 function calculateDamage(_data, _itemParent) {
-  let damage = _data?.data?.damage?.adjusted;
-  if (damage == 0) {
-    damage = _data.data.damage;
-  }
+  let damage = Pick(_data?.data?.damage?.adjusted, _data?.data?.damage);
   //Don't let brawn weapon damage == 0
   damage = fixZeroDamage(damage, _data, _itemParent);
   return damage;

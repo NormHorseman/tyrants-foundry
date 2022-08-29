@@ -7,6 +7,24 @@ export class TyrantsSheet extends ActorSheetFFG {
 
     }
 
+    /** @override */
+    static get defaultOptions() {
+        return mergeObject(super.defaultOptions, {
+            classes: ["starwarsffg", "sheet", "actor"],
+            template: "modules/tyrants-foundry/templates/tyrants-character-sheet.html",
+            width: 710,
+            height: 650,
+            tabs: [{ navSelector: ".sheet-tabs", contentSelector: ".sheet-body", initial: "characteristics" }],
+            scrollY: [".tableWithHeader", ".tab", ".skillsGrid", ".skillsTablesGrid"],
+        });
+    }
+
+      /** @override */
+  get template() {
+    return `modules/tyrants-foundry/templates/tyrants-character-sheet.html`;
+  }
+
+
     getData(options) {
         const data = super.getData();
         data.smelloWorld = "SMELLO WORLD"

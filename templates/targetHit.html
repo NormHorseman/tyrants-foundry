@@ -1,38 +1,4 @@
-<!--
-<div class="dice-result">
-    <div class="item-display" data-item-id="{{data._id}}">
-        {{#iff target '!=' undefined}}
-        <div class="specials">
-            <h2 class="item-name">
-                Final Damage:{{target.finalDamage}} | Breach:{{target.totalBreach}}
-            </h2>
-            <div>
-                <div>{{target.name}}</div>
-                <div class="item-stats flexrow">
-                    {{#iff target.armor '!=' undefined }}
-                    <div>Ar {{target.armor.value}}</div>
-                    {{/iff}}
 
-                    {{#iff target.soak '!=' undefined }}
-                    <div>Soak {{target.soak.value}}</div>
-                    {{/iff}}
-
-                    {{#iff target.massive '!=' undefined }}
-                    <div>Msv {{target.massive}}</div>
-                    {{/iff}}
-                </div>
-            </div>
-            <div class = "flexrow">
-                <input class="damage-value" type="text"
-                    value="To Strain  {{target.strain.original}} ->  {{target.strain.value}}" disabled />
-                <input class="damage-value" type="text"
-                    value="To Wounds  {{target.wounds.original}} ->  {{target.wounds.value}}" disabled />
-            </div>
-        </div>
-        {{/iff}}
-    </div>
-</div>
--->
 Damage
 <div class="tyrants-damage-result">
     {{#iff target '!=' undefined}}

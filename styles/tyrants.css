@@ -54,6 +54,12 @@
         vertical-align: middle;
     }
 
+    .stat-label.name {
+        overflow: hidden;
+        max-width:75px;
+        max-height: 15px;
+    }
+
     .stat-label.damage {
         width: 75px;
     }

@@ -1,3 +1,6 @@
+import { TyrantsActor } from "./tyrants-actor.js";
+import { TargetInfo } from "./targetInfo.js";
+
 export function FindTarget() {
     let target = null;
 
@@ -28,46 +31,13 @@ export function FindControlled() {
 
 export function ReadTargetData(token) {
     if (token) {
-        let target = token.document._actor;
-        let elevation = token.data.elevation;
-        let targetInfo = null;
-        if (target) {
-            targetInfo = {};
-            targetInfo.elevation = elevation;
-            let actorData = target.data;
-            let talentList = actorData.data.talentList;
-            targetInfo.img = target.img;
-            targetInfo.name = actorData.name;
-            targetInfo.wounds = actorData.data.stats.wounds;
-            targetInfo.strain = actorData.data.stats.strain;
-            targetInfo.soak = actorData.data.stats.soak.value;
-            targetInfo.armor = actorData.data.stats.armor.value;
-            targetInfo.meleeDefense = actorData.data.stats.defence.melee;
-            targetInfo.rangedDefense = actorData.data.stats.defence.ranged;
-            targetInfo.magicResist = 0;
-            targetInfo.adversary = 0;
-            targetInfo.breach = actorData.data.stats.breach.value
-            targetInfo.massive = actorData.data.stats.massive;
-            if (!targetInfo.massive) { targetInfo.massive = 0; }
-
-            talentList.forEach(talent => {
-                if (talent.name == "Adversary") {
-                    targetInfo.adversary = talent.rank;
-                }
-                if (talent.name == "Magic Resistance") {
-                    targetInfo.magicResist = talent.rank;
-                }
-                if (talent.name == "Massive") {
-                    targetInfo.massive = talent.rank;
-                }
-            });
-            return targetInfo;
-        } else {
-            return null;
-        }
+        let targetInfo = new TargetInfo();
+        targetInfo.ReadToken(token);
+        return targetInfo;
     } else {
         return null;
     }
+
 }
 
 export function ComputeRoll(_roll, _dicePool) {
@@ -91,6 +61,12 @@ export function ComputeRoll(_roll, _dicePool) {
                 targetInfo.magicResist = 0;
                 targetInfo.adversary = 0;
 
+
+                let isSocial = false;
+                if (_roll.skillName == "Coercion") {
+                    isSocial = true;
+                }
+
                 talentList.forEach(talent => {
                     if (talent.name == "Adversary") {
                         targetInfo.adversary = talent.rank;
@@ -101,75 +77,80 @@ export function ComputeRoll(_roll, _dicePool) {
                     if (talent.name == "Massive") {
                         targetInfo.massive = talent.rank;
                     }
+                });
 
-                    let controlled = FindControlled();
+                let controlled = FindControlled();
+                if (itemRange == "Engaged") {
+                    targetInfo.distance = 0;
+                    targetInfo.rangeName = "Engaged";
+                    _dicePool.difficulty = 1;
+                    _dicePool.setback = targetInfo.meleeDefense;
+                } else {
+                    if (controlled) {
+                        ({
+                            distance: targetInfo.distance,
+                            value: targetInfo.rangeValue,
+                            name: targetInfo.rangeName
+                        } = FindRangeBand(controlled, token));
 
-                    if (itemRange == "Engaged") {
-                        targetInfo.distance = 0;
-                        targetInfo.rangeName = "Engaged";
-                        _dicePool.difficulty = 1;
-                        _dicePool.setback = targetInfo.meleeDefense;
-                    } else {
-                        if (controlled) {
-                            //Apply Distance
-                            targetInfo.rangeValue = ApplyDistanceDifficulty(controlled, token, targetInfo, _dicePool);
+                        if (!isSocial) {
+                            _dicePool.difficulty = targetInfo.rangeValue;
+                            _dicePool.setback = targetInfo.rangedDefense;
                         }
                     }
-                    //Apply Size difference 
-                    if (controlled) {
-                        let myElevation = controlled.data.elevation;
-                        let silDiff = myElevation - elevation;
-                        let sizeBonus = parseInt(silDiff / 2);
-                        sizeBonus = Math.clamped(sizeBonus, -5, 5);
-                        targetInfo.sizeBonus = sizeBonus;
-
-                        _dicePool.difficulty += sizeBonus;
+                }
+                //Apply Size difference 
+                if (controlled) {
+                    targetInfo.sizeBonus = CalculateSizeBonus(controlled.data.elevation, elevation);
+                    if (!isSocial) {
+                        _dicePool.difficulty += targetInfo.sizeBonus;
                         if (_dicePool.difficulty < 0) {
                             _dicePool.difficulty = 0;
                         }
                     }
-                })
-                _dicePool.upgradeDifficulty(targetInfo.adversary);
+                }
+
+                if (!isSocial) {
+                    _dicePool.upgradeDifficulty(targetInfo.adversary);
+                }
                 return targetInfo;
             }
         }
     }
 }
 
-function ApplyDistanceDifficulty(controlled, token, targetInfo, _dicePool) {
+function CalculateSizeBonus(attackerElevation, targetElevation) {
+    let silDiff = attackerElevation - targetElevation;
+    let sizeBonus = parseInt(silDiff / 2);
+    return Math.clamped(sizeBonus, -5, 5);
+}
+
+function FindRangeBand(controlled, token) {
     //Add Targeting Data
     let gridSize = game.scenes?.current?.dimensions?.size
     var dist = Distance(controlled, token);
     let squares = dist / gridSize;
-    targetInfo.distance = squares;
-    targetInfo.rangeValue = 1 + parseInt(squares / 6);
-    switch (targetInfo.rangeValue) {
+    let result = {};
+    result.distance = squares;
+    result.value = 1 + parseInt(squares / 6);
+    switch (result.value) {
         case 1:
-            _dicePool.difficulty = 1;
-            _dicePool.setback = targetInfo.rangedDefense;
-            targetInfo.rangeName = "Short";
+            result.name = "Short";
             break;
         case 2:
-            _dicePool.difficulty = 2;
-            _dicePool.setback = targetInfo.rangedDefense;
-            targetInfo.rangeName = "Medium";
+            result.name = "Medium";
             break;
         case 3:
-            _dicePool.difficulty = 3;
-            _dicePool.setback = targetInfo.rangedDefense;
-            targetInfo.rangeName = "Long";
+            result.name = "Long";
             break;
         case 4:
-            _dicePool.difficulty = 3;
-            _dicePool.setback = targetInfo.rangedDefense;
-            targetInfo.rangeName = "Extreme";
+            result.name = "Extreme";
             break;
         default:
-            _dicePool.difficulty = 1;
-            targetInfo.rangeName = "Short";
-            _dicePool.setback = targetInfo.rangedDefense;
+            result.name = "Short";
             break;
     }
+    return result;
 }
 
 function Distance(controlled, token) {

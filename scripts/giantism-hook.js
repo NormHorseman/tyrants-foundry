@@ -11,19 +11,8 @@ export class GiantismHook {
             let item = RollFFG.data;
             let ffg = RollFFG.ffg;
             let actor = RollFFG.actor;
-
-
-            let result = WeaponRoll(item, actor, ffg);
-            console.log("TYRANTS WEAPON ROLL RESULT");
-            console.log(result);
-
-            if (result?.target) {
-                const content = await renderTemplate(`modules/tyrants-foundry/templates/targetHit.html`, result);
-                let message = ChatMessage.create({
-                    user: game.user._id,
-                    content: content,
-                    type: "giantismTargetHit"
-                });
+            if (item.type == "weapon") {
+                await this.showWeaponResult(item, actor, ffg);
             }
 
         });
@@ -42,6 +31,33 @@ export class GiantismHook {
     }
 
 
+
+    async showWeaponResult(item, actor, ffg) {
+        let skill = item?.data?.skill?.value;
+        if (skill == "Coercion") {
+            //Show Scathing Tirade
+            let result={};
+            result.ffg=ffg;
+            const content = await renderTemplate(`modules/tyrants-foundry/templates/scathingTiradeHit.html`, result);
+            let message = ChatMessage.create({
+                user: game.user._id,
+                content: content,
+                type: "scathingTiradeHit"
+            });
+
+        }else{
+            let result = WeaponRoll(item, actor, ffg);
+            if (result?.target) {
+                const content = await renderTemplate(`modules/tyrants-foundry/templates/targetHit.html`, result);
+                let message = ChatMessage.create({
+                    user: game.user._id,
+                    content: content,
+                    type: "giantismTargetHit"
+                });
+            }
+        }
+
+    }
 }
 
 async function updateTokenSizes(item) {
