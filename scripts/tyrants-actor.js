@@ -18,7 +18,6 @@ export class TyrantsActor extends ActorFFG {
         if (actor.type == "vehicle") {
             return;
         }
-        console.log("APPLY GIANTISM")
         let divinity = actor.flags["tyrants-foundry"]?.divinity;
         actor.data.stats.silhouette = 1;
         actor.data.stats.silhouette += (divinity?.powers?.growth?.value+1);

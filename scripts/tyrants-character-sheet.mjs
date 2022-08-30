@@ -1,6 +1,6 @@
 import { ActorSheetFFG } from "../../../systems/starwarsffg/modules/actors/actor-sheet-ffg.js";
 import { TyrantsDiceHelpers } from "./tyrants-dice-helper.js";
-import { TYRANTS } from "./divinity-data.js";
+import { DivinityData, TYRANTS } from "./divinity-data.js";
 
 export class TyrantsSheet extends ActorSheetFFG {
     constructor(data, context) {
@@ -48,6 +48,36 @@ export class TyrantsSheet extends ActorSheetFFG {
                 //Extend DiceHelpers, override rollSkill. THIS IS THE SOLUTION!!!
             });
 
+        html
+            .find("#add-divine-skill-button")
+            .on("click", async (event) => {
+                console.log("SKILLS", this.actor);
+                let result ={};
+                let skills = this.actor.data.data.skills;
+                result.skills=skills;
+                console.log(skills);
+                const myContent = await renderTemplate(`modules/tyrants-foundry/templates/tyrants-add-divine-skill.html`, result);
+
+                const options = {
+                    height: 330
+                }
+                let d = new Dialog({
+                    title: "ADD SKILL",
+                    content: myContent,
+                    buttons: {
+                        one: {
+                            icon: '<i class="fas fa-times"></i>',
+                            label: "OK"
+                        },
+                    },
+                    default: "one",
+                    render: html => console.log("Register interactivity in the rendered dialog"),
+                    close: html => console.log("This always is logged no matter which option is chosen")
+                }, options);
+                d.render(true);
+            });
+
+
         this.setDivinityButtons(html, TYRANTS.DIVINITY.GROWTH);
         this.setDivinityButtons(html, TYRANTS.DIVINITY.DESTRUCTION);
         this.setDivinityButtons(html, TYRANTS.DIVINITY.TALENTS);
@@ -69,6 +99,9 @@ export class TyrantsSheet extends ActorSheetFFG {
     increasePower(item) {
         let actor = this.actor;
         let divinity = actor.getFlag("tyrants-foundry", "divinity");
+        if (!divinity) {
+            DivinityData.create(actor.id, new DivinityData());
+        }
         let power = divinity.powers[item.key];
         let manaSpent = divinity.mana.spent;
         let powerSpent = power.spent;
@@ -86,13 +119,17 @@ export class TyrantsSheet extends ActorSheetFFG {
             ['flags.tyrants-foundry.divinity.mana.spent']: finalSpend,
         };
         actor.update(updateData);
-        if(item.key==TYRANTS.DIVINITY.GROWTH.key)
+        if (item.key == TYRANTS.DIVINITY.GROWTH.key)
             Hooks.call("updateSize", this);
     }
 
     decreasePower(item) {
         let actor = this.actor;
         let divinity = actor.getFlag("tyrants-foundry", "divinity");
+        if (!divinity) {
+            DivinityData.create(actor.id, new DivinityData());
+            return;
+        }
         let power = divinity.powers[item.key];
         let manaSpent = divinity.mana.spent;
         let powerSpent = power.spent;
@@ -112,7 +149,7 @@ export class TyrantsSheet extends ActorSheetFFG {
             };
             actor.update(updateData);
         }
-        if(item.key==TYRANTS.DIVINITY.GROWTH.key)
+        if (item.key == TYRANTS.DIVINITY.GROWTH.key)
             Hooks.call("updateSize", this);
     }
 }

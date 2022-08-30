@@ -52,3 +52,8 @@ export class DivinityData {
     static delete(todoId) { }
 
 }
+
+function GetSkillNames() {
+    let skills = JSON.parse(game.settings.get("starwarsffg", "arraySkillList"))[1].skills;
+    return Object.keys(skills);
+}
