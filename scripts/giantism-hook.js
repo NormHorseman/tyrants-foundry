@@ -3,6 +3,8 @@ import { WeaponRoll } from "./weapon-roll.js";
 
 export const SizeTalents = ["Giantism", "Massive", "Bonus Silhouette"];
 
+let updateSizeCommandStack=[];
+
 
 export class GiantismHook {
     constructor() {
@@ -19,9 +21,24 @@ export class GiantismHook {
 
         Hooks.on("updateItem", async (item, data, options, id) => {
             if (id == game.userId) {
-                await updateTokenSizes(item);
+                await updateTokenSizesFromItem(item);
 
             }
+        });
+
+        Hooks.on("updateSize", async (item, data, options, id) => {
+            console.log("UPDATE SIZE PUSHED")
+            if (id == game.userId || game.user.isGM) {
+                updateSizeCommandStack.push(item)
+            }
+        });
+
+        Hooks.on("renderActorSheet",async(...args)=>{
+            if(updateSizeCommandStack.length>0){
+                console.log("UPDATE SIZE POPPED")
+                await updateTokenSizesFromSheet(updateSizeCommandStack.pop());
+            }
+
         });
 
         Hooks.on("createToken", async (...args) => {
@@ -36,8 +53,8 @@ export class GiantismHook {
         let skill = item?.data?.skill?.value;
         if (skill == "Coercion") {
             //Show Scathing Tirade
-            let result={};
-            result.ffg=ffg;
+            let result = {};
+            result.ffg = ffg;
             const content = await renderTemplate(`modules/tyrants-foundry/templates/scathingTiradeHit.html`, result);
             let message = ChatMessage.create({
                 user: game.user._id,
@@ -45,7 +62,7 @@ export class GiantismHook {
                 type: "scathingTiradeHit"
             });
 
-        }else{
+        } else {
             let result = WeaponRoll(item, actor, ffg);
             if (result?.target) {
                 const content = await renderTemplate(`modules/tyrants-foundry/templates/targetHit.html`, result);
@@ -60,7 +77,20 @@ export class GiantismHook {
     }
 }
 
-async function updateTokenSizes(item) {
+async function updateTokenSizesFromSheet(sheet) {
+    let actor = sheet.actor;
+    let protoToken = actor.data.token
+    await actor.update({
+        token:
+        {
+            height: protoToken.height,
+            width: protoToken.width
+        }
+    });
+    updateActiveTokens(actor, protoToken);
+}
+
+async function updateTokenSizesFromItem(item) {
     //Update Token Size
     if (!SizeTalents.includes(item.name)) {
         return;

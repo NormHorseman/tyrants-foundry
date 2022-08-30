@@ -3,6 +3,7 @@ import { TyrantsActor } from "./tyrants-actor.js";
 import { RollItemModifier } from "./itemModifier-roll.js";
 import { FindTarget } from "./target-helper.js";
 import { Pick, Value } from "./tools.js";
+import { TYRANTS } from "./divinity-data.js";
 
 export function WeaponRoll(_data, _itemParent, _ffg) {
   //Handle Item attack rolls
@@ -32,7 +33,7 @@ function CalculateTargetInfo(breach, _itemParent, damage, _ffg) {
     target = {};
     target.name = userTarget.name;
 
-    let targetStats = userTarget?.data?.data?.stats ;
+    let targetStats = userTarget?.data?.data?.stats;
     if (targetStats) {
       let viewStats = JSON.parse(JSON.stringify(targetStats));
       target.armor = viewStats.armor;
@@ -44,19 +45,27 @@ function CalculateTargetInfo(breach, _itemParent, damage, _ffg) {
 
       let parentActorId = Pick(_itemParent?._id, _itemParent.id);
       let targetActorId = Pick(userTarget.id, userTarget._id);
+      let parentActor = game.actors.get(parentActorId);
+      let targetActor = game.actors.get(targetActorId);
 
-      let totalBreach = breach + GetGiantismBreach(parentActorId);
+      let totalBreach = breach + GetGiantismBreach(parentActor);
       let armor = Value(target?.armor?.value);
       let soak = Value(target?.soak?.value);
       let totalSoak = armor + soak;
       totalSoak -= totalBreach;
-      totalSoak = Math.max(totalSoak, 0);
-      let diceDamage = damage + _ffg.success;
-      target.finalDamage = Math.max((diceDamage - totalSoak), 0);
+      totalSoak = Math.max(totalSoak, 0)
+      console.log(parentActor);
+      let destruction = parentActor.getFlag(TYRANTS.ID, TYRANTS.FLAGS.DIVINITY)?.powers?.destruction?.value;
+      if (!destruction) {
+        destruction = 0;
+      }
+      target.totalDamage = damage + _ffg.success + Math.max(destruction, 0);
+      target.destruction = destruction;
+      target.finalDamage = Math.max((target.totalDamage - totalSoak), 0);
       target.totalBreach = totalBreach;
       target.wounds.value += target.finalDamage;
       target.strain.value += target.finalDamage;
-      target.massive = GetTalentRanks(targetActorId, "Massive");
+      target.massive = GetTalentRanks(targetActor, "Massive");
     }
   }
   return target;
@@ -64,13 +73,13 @@ function CalculateTargetInfo(breach, _itemParent, damage, _ffg) {
 
 
 
-function GetGiantismBreach(actorId) {
-  let talentRanks = GetTalentRanks(actorId, "Giantism");
+function GetGiantismBreach(actor) {
+  let talentRanks = GetTalentRanks(actor, "Giantism");
   return Math.trunc(talentRanks / 4);
 }
 
-function GetTalentRanks(actorId, talentName) {
-  let talent = game.actors.get(actorId).items.getName(talentName);
+function GetTalentRanks(actor, talentName) {
+  let talent = actor.items.getName(talentName);
   return talent?.data?.data?.ranks?.current;
 }
 

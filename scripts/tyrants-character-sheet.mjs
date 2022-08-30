@@ -1,5 +1,6 @@
 import { ActorSheetFFG } from "../../../systems/starwarsffg/modules/actors/actor-sheet-ffg.js";
 import { TyrantsDiceHelpers } from "./tyrants-dice-helper.js";
+import { TYRANTS } from "./divinity-data.js";
 
 export class TyrantsSheet extends ActorSheetFFG {
     constructor(data, context) {
@@ -19,26 +20,19 @@ export class TyrantsSheet extends ActorSheetFFG {
         });
     }
 
-      /** @override */
-  get template() {
-    return `modules/tyrants-foundry/templates/tyrants-character-sheet.html`;
-  }
-
-
-    getData(options) {
-        const data = super.getData();
-        data.smelloWorld = "SMELLO WORLD"
-        //Call compute roll here?
-        return data;
+    /** @override */
+    get template() {
+        return `modules/tyrants-foundry/templates/tyrants-character-sheet.html`;
     }
+
 
     activateListeners(html) {
         super.activateListeners(html);
+
         html
             .find(".roll-button")
             .children()
             .off();
-
         html
             .find(".roll-button")
             .children()
@@ -53,5 +47,72 @@ export class TyrantsSheet extends ActorSheetFFG {
 
                 //Extend DiceHelpers, override rollSkill. THIS IS THE SOLUTION!!!
             });
+
+        this.setDivinityButtons(html, TYRANTS.DIVINITY.GROWTH);
+        this.setDivinityButtons(html, TYRANTS.DIVINITY.DESTRUCTION);
+        this.setDivinityButtons(html, TYRANTS.DIVINITY.TALENTS);
+    }
+
+    setDivinityButtons(html, item) {
+        html
+            .find(`#increase-${item.key}`)
+            .on("click", async (event) => {
+                this.increasePower(item);
+            });
+        html
+            .find(`#decrease-${item.key}`)
+            .on("click", async (event) => {
+                this.decreasePower(item);
+            });
+    }
+
+    increasePower(item) {
+        let actor = this.actor;
+        let divinity = actor.getFlag("tyrants-foundry", "divinity");
+        let power = divinity.powers[item.key];
+        let manaSpent = divinity.mana.spent;
+        let powerSpent = power.spent;
+        let currentRank = power.value;
+        let nextRank = currentRank + 1;
+        let cost = nextRank * item.cost;
+        if (nextRank == 0) {
+            cost = 1;
+        }
+        let finalSpend = manaSpent + cost;
+        let finalPowerSpend = powerSpent + cost;
+        const updateData = {
+            [`flags.tyrants-foundry.divinity.powers.${item.key}.value`]: nextRank,
+            [`flags.tyrants-foundry.divinity.powers.${item.key}.spent`]: finalPowerSpend,
+            ['flags.tyrants-foundry.divinity.mana.spent']: finalSpend,
+        };
+        actor.update(updateData);
+        if(item.key==TYRANTS.DIVINITY.GROWTH.key)
+            Hooks.call("updateSize", this);
+    }
+
+    decreasePower(item) {
+        let actor = this.actor;
+        let divinity = actor.getFlag("tyrants-foundry", "divinity");
+        let power = divinity.powers[item.key];
+        let manaSpent = divinity.mana.spent;
+        let powerSpent = power.spent;
+        let currentRank = power.value;
+        let nextRank = currentRank - 1;
+        let cost = currentRank * item.cost;
+        if (currentRank <= 0) {
+            cost = 1;
+        }
+        let finalSpend = manaSpent - cost;
+        let finalPowerSpend = powerSpent - cost;
+        if (nextRank >= -1) {
+            const updateData = {
+                [`flags.tyrants-foundry.divinity.powers.${item.key}.value`]: nextRank,
+                [`flags.tyrants-foundry.divinity.powers.${item.key}.spent`]: finalPowerSpend,
+                ['flags.tyrants-foundry.divinity.mana.spent']: finalSpend,
+            };
+            actor.update(updateData);
+        }
+        if(item.key==TYRANTS.DIVINITY.GROWTH.key)
+            Hooks.call("updateSize", this);
     }
 }

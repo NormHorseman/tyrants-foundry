@@ -65,6 +65,7 @@ async function WriteCalulate(toStrain) {
 
     if (result?.target) {
         result.target.CalculateDamage(itemBreach, damage, result.controlled);
+        let targetActor = targetToken.actor;
         if (toStrain) {
             targetActor.data.data.stats.strain.value += result.target.finalDamage;
         } else {

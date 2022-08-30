@@ -18,7 +18,10 @@ export class TyrantsActor extends ActorFFG {
         if (actor.type == "vehicle") {
             return;
         }
+        console.log("APPLY GIANTISM")
+        let divinity = actor.flags["tyrants-foundry"]?.divinity;
         actor.data.stats.silhouette = 1;
+        actor.data.stats.silhouette += (divinity?.powers?.growth?.value+1);
         let map = {};
         for (let i = 0; i < SizeTalents.length; i++) {
             let talent = SizeTalents[i];
@@ -28,9 +31,13 @@ export class TyrantsActor extends ActorFFG {
                 actor.data.stats.silhouette += item.data.data.ranks.current
             }
         }
+
         let giantism = map["Giantism"];
         if (giantism) {
             let ranks = giantism.data.data.ranks.current
+            if (divinity) {
+                ranks += (divinity.powers.growth.value+1);
+            }
             let breach = parseInt(ranks / 4, 10);
             let armor = parseInt(ranks / 5, 10);
             actor.data.stats.breach = {};

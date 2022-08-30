@@ -1,3 +1,4 @@
+import { TYRANTS } from "./divinity-data.js";
 
 export class TargetInfo {
     img; name; wounds; strain; soak; armor; meleeDefense; rangedDefense; magicResist; breach; massive;
@@ -26,6 +27,12 @@ export class TargetInfo {
         this.adversary = 0;
         this.breach = actorData.data.stats.breach.value
         this.massive = actorData.data.stats.massive;
+        console.log("ACTOR", actor)
+        let destruction = actor.getFlag(TYRANTS.ID, TYRANTS.FLAGS.DIVINITY)?.powers?.destruction?.value;
+        if (!destruction) {
+            destruction = 0;
+        }
+        this.destruction = destruction;
 
         if (!this.massive) { this.massive = 0; }
 
@@ -42,6 +49,8 @@ export class TargetInfo {
 
     CalculateDamage(itemBreach, damage, controlled) {
         let totalSoak = this.armor + this.soak;
+        this.destruction = controlled.destruction;
+        this.totalDamage = damage + this.destruction;
         this.totalBreach = itemBreach + controlled.breach;
         totalSoak -= this.totalBreach;
         this.finalDamage = damage - totalSoak;
