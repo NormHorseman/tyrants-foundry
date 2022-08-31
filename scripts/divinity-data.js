@@ -24,9 +24,9 @@ export class DivinityData {
     powers = {
         growth: { value: -1, adjusted: 0, spent: 0 },
         destruction: { value: -1, adjusted: 0, spent: 0 },
-        skills: { value: -1, adjusted: 0, spent: 0 },
         talents: { value: -1, adjusted: 0, spent: 0 },
         sizeChange: { value: -1, adjusted: 0, spent: 0 },
+        skills:[]
     };
 
     // get all todos for a given user
@@ -43,6 +43,19 @@ export class DivinityData {
         let flag = TYRANTS.FLAGS.DIVINITY;
         console.log(flag);
         game.actors.get(actorId).setFlag(TYRANTS.ID, flag, newData);
+    }
+
+    static addSkill(actorId, skillName) {
+        let divinity = this.get(actorId);
+        if (!divinity) {
+            this.create(actorId, new DivinityData());
+            divinity = this.get(actorId);
+        }
+        divinity.powers.skills.push({ label: skillName, value: -1, adjusted: 0, spent: 0 });
+        const updateData = {
+            [`flags.tyrants-foundry.divinity.powers.skills`]: divinity.powers.skills,
+        };
+        game.actors.get(actorId).update(updateData);
     }
 
     // update a specific todo by id with the provided updateData

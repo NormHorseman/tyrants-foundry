@@ -27,7 +27,6 @@ export class GiantismHook {
         });
 
         Hooks.on("updateSize", async (item, data, options, id) => {
-            console.log("UPDATE SIZE PUSHED")
             if (id == game.userId || game.user.isGM) {
                 updateSizeCommandStack.push(item)
             }
@@ -35,7 +34,6 @@ export class GiantismHook {
 
         Hooks.on("renderActorSheet",async(...args)=>{
             if(updateSizeCommandStack.length>0){
-                console.log("UPDATE SIZE POPPED")
                 await updateTokenSizesFromSheet(updateSizeCommandStack.pop());
             }
 

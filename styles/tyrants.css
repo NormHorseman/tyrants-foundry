@@ -107,17 +107,80 @@
     .divinity-item-row.header {
         display: flex;
         flex-flow: row;
-        width:auto;
+        width: auto;
 
     }
 
     .divinity-item-row.item {
         margin: 5px 5px 5px 0px;
-        width:auto;
+        width: auto;
         font-size: 24;
         font-weight: bold;
     }
 
     .divinity-item-row.buttons {
-        width:auto;
+        width: auto;
+    }
+
+    .divinity-main {
+        display: flex;
+        flex-flow: row;
+        width: auto;
+    }
+
+    .divinity-power-panel {
+        height: 300px;
+    }
+
+    .divinity-skill-panel {
+        height: 300px;
+        overflow: scroll;
+        overflow-x: hidden;
+        margin-left: 10px;
+    }
+
+    .divinity-skill-table {
+        width:250px;
+    }
+
+    .divinity-skill-table-label {
+        padding-right: 10px;
+    }
+
+    .divinity-skill-table-value {
+        margin-left: 5px;
+    }
+
+    .divinity-skill-row {
+        display: flex;
+        flex-flow: row;
+        justify-content: space-between;
+    }
+
+    .divinity-skill-buttons {
+        display: flex;
+        flex-flow: row;
+        justify-content: start;
+        width: 100px;
+    }
+
+    .delete-divine-skill {
+        width: 50px;
+        text-align: center;
+        margin-left: 5px;
+        border-style: solid;
+        border-width: 1px;
+        text-align: center;
+    }
+
+
+    .change-divine-skill {
+        width: 16px;
+        border-style: solid;
+        border-width: 1px;
+        text-align: center;
+    }
+
+    .reset-button{
+        width:60px;
     }

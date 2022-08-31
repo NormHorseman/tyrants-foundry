@@ -48,13 +48,14 @@ export class TyrantsSheet extends ActorSheetFFG {
                 //Extend DiceHelpers, override rollSkill. THIS IS THE SOLUTION!!!
             });
 
+        //Add divine skill
         html
             .find("#add-divine-skill-button")
             .on("click", async (event) => {
                 console.log("SKILLS", this.actor);
-                let result ={};
+                let result = {};
                 let skills = this.actor.data.data.skills;
-                result.skills=skills;
+                result.skills = skills;
                 console.log(skills);
                 const myContent = await renderTemplate(`modules/tyrants-foundry/templates/tyrants-add-divine-skill.html`, result);
 
@@ -67,7 +68,9 @@ export class TyrantsSheet extends ActorSheetFFG {
                     buttons: {
                         one: {
                             icon: '<i class="fas fa-times"></i>',
-                            label: "OK"
+                            label: "OK",
+                            actor: this.actor,
+                            callback: this.AddSkill
                         },
                     },
                     default: "one",
@@ -76,11 +79,40 @@ export class TyrantsSheet extends ActorSheetFFG {
                 }, options);
                 d.render(true);
             });
+        //reset divine skills
+        html
+            .find(`#divinity-reset-button`)
+            .on("click", async (event) => {
+                this.actor.unsetFlag(TYRANTS.ID, TYRANTS.FLAGS.DIVINITY);
+            });
 
 
         this.setDivinityButtons(html, TYRANTS.DIVINITY.GROWTH);
         this.setDivinityButtons(html, TYRANTS.DIVINITY.DESTRUCTION);
         this.setDivinityButtons(html, TYRANTS.DIVINITY.TALENTS);
+
+        let divinity = DivinityData.get(this.actor.id);
+        let divineSkills = divinity?.powers?.skills;
+        if (divineSkills) {
+            for (let i = 0; i < divineSkills.length; i++) {
+                let skill = divineSkills[i];
+                this.setDivinitySkillButtons(html, skill.label, i, divineSkills);
+
+            }
+        }
+
+
+
+    }
+
+    AddSkill() {
+        console.log("ADD SKILL TRIGGERED!");
+        let skill = document.getElementById("divine-skill-select").value;
+        console.log("Add Skill:" + skill);
+        console.log("THIS", this);
+        console.log("ACTOR", this.actor);
+
+        DivinityData.addSkill(this.actor.id, skill);
     }
 
     setDivinityButtons(html, item) {
@@ -94,6 +126,105 @@ export class TyrantsSheet extends ActorSheetFFG {
             .on("click", async (event) => {
                 this.decreasePower(item);
             });
+    }
+
+    setDivinitySkillButtons(html, key, index, divineSkills) {
+        html
+            .find(`#increase-${key}`)
+            .on("click", async (event) => {
+                this.increaseSkillPower(index, divineSkills);
+            });
+        html
+            .find(`#decrease-${key}`)
+            .on("click", async (event) => {
+                this.decreaseSkillPower(index, divineSkills);
+            });
+        html
+            .find(`#delete-${key}`)
+            .on("click", async (event) => {
+                this.deleteSkill(key);
+            });
+
+    }
+
+    increaseSkillPower(index, divineSkills) {
+        let actor = this.actor;
+        let divinity = actor.getFlag("tyrants-foundry", "divinity");
+        if (!divinity) {
+            DivinityData.create(actor.id, new DivinityData());
+        }
+        let power = divinity.powers.skills[index];
+        let manaSpent = divinity.mana.spent;
+        let powerSpent = power.spent;
+        let currentRank = power.value;
+        let nextRank = currentRank + 1;
+        let cost = nextRank * 2;
+        if (nextRank == 0) {
+            cost = 1;
+        }
+        let finalSpend = manaSpent + cost;
+        let finalPowerSpend = powerSpent + cost;
+        divineSkills[index].value = nextRank;
+        divineSkills[index].spent = finalPowerSpend;
+        const updateData = {
+            [`flags.tyrants-foundry.divinity.powers.skills`]: divineSkills,
+            ['flags.tyrants-foundry.divinity.mana.spent']: finalSpend,
+        };
+        actor.update(updateData);
+    }
+
+    decreaseSkillPower(index, divineSkills) {
+        let actor = this.actor;
+        let divinity = actor.getFlag("tyrants-foundry", "divinity");
+        if (!divinity) {
+            DivinityData.create(actor.id, new DivinityData());
+        }
+        let power = divinity.powers.skills[index];
+        let manaSpent = divinity.mana.spent;
+        let powerSpent = power.spent;
+        let currentRank = power.value;
+        let nextRank = currentRank - 1;
+        let cost = currentRank * 2;
+        if (currentRank <= 0) {
+            cost = 1;
+        }
+        let finalSpend = manaSpent - cost;
+        let finalPowerSpend = powerSpent - cost;
+        if (nextRank >= -1) {
+            divineSkills[index].value = nextRank;
+            divineSkills[index].spent = finalPowerSpend;
+            const updateData = {
+                [`flags.tyrants-foundry.divinity.powers.skills`]: divineSkills,
+                ['flags.tyrants-foundry.divinity.mana.spent']: finalSpend,
+            };
+            actor.update(updateData);
+        }
+    }
+
+    deleteSkill(key) {
+        let actor = this.actor;
+        let divinity = actor.getFlag("tyrants-foundry", "divinity");
+        if (!divinity) {
+            DivinityData.create(actor.id, new DivinityData());
+        }
+        let skills = divinity.powers.skills;
+        let manaSpent = divinity.mana.spent;
+        let newSkills = [];
+        let freedMana = 0;
+        for (let i = 0; i < skills.length; i++) {
+            let skill = skills[i];
+            if (skill.label != key) {
+                freedMana += skill.spent
+                newSkills.push(skill);
+            }
+        }
+        let finalSpend = manaSpent - freedMana;
+        const updateData = {
+            [`flags.tyrants-foundry.divinity.powers.skills`]: newSkills,
+            ['flags.tyrants-foundry.divinity.mana.spent']: finalSpend,
+        };
+        actor.update(updateData);
+
     }
 
     increasePower(item) {

@@ -12,6 +12,22 @@ export class TyrantsActor extends ActorFFG {
         super.prepareDerivedData();
         const actorData = this.data;
         this.applyGiantism(actorData);
+        this.applyDivinity(actorData);
+    }
+
+    applyDivinity(actor) {
+        let divinity = actor?.flags["tyrants-foundry"]?.divinity;
+        let skills = divinity?.powers?.skills;
+        if (!skills) {
+            return;
+        }
+        for (let i = 0; i < skills.length; i++) {
+            let skill = skills[i];
+            let divineRank = skill.value + 1;
+            let baseRank = actor.data.skills[skill.label].rank;
+            actor.data.skills[skill.label].rank = baseRank + divineRank;
+        }
+
     }
 
     applyGiantism(actor) {
@@ -19,8 +35,16 @@ export class TyrantsActor extends ActorFFG {
             return;
         }
         let divinity = actor.flags["tyrants-foundry"]?.divinity;
+        let divineGrowth = divinity?.powers?.growth?.value;
+        if (divineGrowth) {
+            divineGrowth += 1;
+        } else {
+            divineGrowth = 0;
+        }
+
+
         actor.data.stats.silhouette = 1;
-        actor.data.stats.silhouette += (divinity?.powers?.growth?.value+1);
+        actor.data.stats.silhouette += (divinity?.powers?.growth?.value + 1);
         let map = {};
         for (let i = 0; i < SizeTalents.length; i++) {
             let talent = SizeTalents[i];
@@ -33,10 +57,7 @@ export class TyrantsActor extends ActorFFG {
 
         let giantism = map["Giantism"];
         if (giantism) {
-            let ranks = giantism.data.data.ranks.current
-            if (divinity) {
-                ranks += (divinity.powers.growth.value+1);
-            }
+            let ranks = giantism.data.data.ranks.current + divineGrowth;
             let breach = parseInt(ranks / 4, 10);
             let armor = parseInt(ranks / 5, 10);
             actor.data.stats.breach = {};
